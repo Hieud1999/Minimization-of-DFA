@@ -10,10 +10,10 @@ class Otomat:
         self.delta = delta
         self.extraState = 'ES'      #đỉnh thêm mới (nếu có)
 
-    '''
-        Đầy đủ hóa otomat đơn định - điền hàm chuyển trạng thái rỗng
-    '''
     def fill_otomat(self):
+        '''
+            Đầy đủ hóa otomat đơn định - điền hàm chuyển trạng thái rỗng
+        '''
         for state in self.S:
             if state not in self.delta.keys():
                 self.delta[state] = {}
@@ -30,6 +30,9 @@ class Otomat:
                         self.S.append(self.extraState)
 
     def mark_table(self):
+        '''
+            Đánh dấu bảng (ma trận cỡ len(self.S) x len(self.S))
+        '''
         table = np.zeros((len(self.S), len(self.S)), dtype = np.bool)
         while 1:
             unmarkable = True
@@ -55,13 +58,16 @@ class Otomat:
         return table
 
     def combine_unmarked(self, table):
+        '''
+            Gộp những đỉnh chưa được đánh dấu trong bảng
+        '''
         unmarked_states_group = []
         for i in range(len(self.S)):
             for j in range(len(self.S)):
                 if i == j:
                     continue
                 if table[i][j] == 0:
-                    if [self.S[i], self.S[j]] not in unmarked_states_group and [self.S[j], self.S[i]] not in unmarked_states_group:
+                    if [self.S[i], self.S[j]] and [self.S[j], self.S[i]] not in unmarked_states_group:
                         # [C, D], [D, E], [E, C] -> [C, D, E]
                         check = False
                         for k in range(len(unmarked_states_group)):
@@ -75,6 +81,9 @@ class Otomat:
         return unmarked_states_group
     
     def minimize(self):
+        '''
+            Tối thiểu hóa otomat đơn định
+        '''
 
         self.fill_otomat()
         table = self.mark_table()
@@ -94,25 +103,37 @@ class Otomat:
                     self.delta[new_state][symbol] += self.delta[state][symbol]
                 del self.delta[state]
 
-        # Thay thế trạng thái cũ trong bảng chuyển trạng thái
-        for state in self.S:
-            for symbol in self.sigma:
-                for idx, trans_state in enumerate(self.delta[state][symbol]):
-                    if trans_state not in self.S:
+        # # Thay thế trạng thái cũ trong bảng chuyển trạng thái
+        # for state in self.S:
+        #     for symbol in self.sigma:
+        #         for idx, next_state in enumerate(self.delta[state][symbol]):
+        #             if next_state not in self.S:
+        #                 for new_state in self.S:
+        #                     if next_state in new_state:
+        #                         self.delta[state][symbol][idx] = new_state
+        #         self.delta[state][symbol] = list(set(self.delta[state][symbol]))   
+
+        for i in range(len(self.S)):
+            for j in range(len(self.sigma)):
+                for idx, next_state in enumerate(self.delta[self.S[i]][self.sigma[j]]):
+                    if next_state not in self.S:
                         for new_state in self.S:
-                            if trans_state in new_state:
-                                self.delta[state][symbol][idx] = new_state
-                self.delta[state][symbol] = list(set(self.delta[state][symbol]))    
+                            if next_state in new_state:
+                                self.delta[self.S[i]][self.sigma[j]][idx] = new_state
+                self.delta[self.S[i]][self.sigma[j]] = list(set(self.delta[self.S[i]][self.sigma[j]]))
 
         # Thay thế trạng thái cũ trong tập trạng thái kết
         for idx, final_state in enumerate(self.F):
             if final_state not in self.S:
-                for state in self.S:
-                    if final_state in state:
-                        self.F[idx] = state
+                for i in range(len(self.S)):
+                    if final_state in self.S[i]:
+                        self.F[idx] = self.S[i]
         self.F = list(set(self.F))
 
 def input_otomat(self):
+    '''
+        Nhập otomat từ file json
+    '''
     with open("test.json", "r") as json_file:
         data = json.load(json_file)
 
