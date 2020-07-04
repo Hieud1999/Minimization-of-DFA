@@ -22,29 +22,29 @@ class Otomat:
         Đơn định hóa otomat
     '''
 
-    def remove_epsilon(self):
-        '''
-            Xóa các cạnh epsilon
-        '''
-        for state in self.S:
-            if '$' in self.delta[state].keys():
-                target_states = self.delta[state]['$']
-                for t_state in target_states:
-                    for symbol in self.sigma:
-                        self.delta[state][symbol] += self.delta[t_state][symbol]
-                    if t_state in self.F:
-                        if state not in self.F:
-                            self.F.append(state)
-                for symbol in self.sigma:
-                    self.delta[state][symbol] = list(set(self.delta[state][symbol]))
+    # def remove_epsilon(self):
+    #     '''
+    #         Xóa các cạnh epsilon
+    #     '''
+    #     for state in self.S:
+    #         if '$' in self.delta[state].keys():
+    #             target_states = self.delta[state]['$']
+    #             for t_state in target_states:
+    #                 for symbol in self.sigma:
+    #                     self.delta[state][symbol] += self.delta[t_state][symbol]
+    #                 if t_state in self.F:
+    #                     if state not in self.F:
+    #                         self.F.append(state)
+    #             for symbol in self.sigma:
+    #                 self.delta[state][symbol] = list(set(self.delta[state][symbol]))
 
-                # S0 -> $S2, S1 -> aS0. -> S1 -> aS2
-                for other_state in self.S:
-                    for symbol in self.delta[other_state].keys():
-                        if state in self.delta[other_state][symbol]:
-                            self.delta[other_state][symbol] += self.delta[state]['$']
+    #             # S0 -> $S2, S1 -> aS0. -> S1 -> aS2
+    #             for other_state in self.S:
+    #                 for symbol in self.delta[other_state].keys():
+    #                     if state in self.delta[other_state][symbol]:
+    #                         self.delta[other_state][symbol] += self.delta[state]['$']
 
-                del self.delta[state]['$']                
+    #             del self.delta[state]['$']                
 
     def fill(self):
         '''
@@ -63,84 +63,84 @@ class Otomat:
                     if self.extraState not in self.S:
                         self.S.append(self.extraState)
 
-    def DFA(self):
-        '''
-            Đầy đủ và đơn định hóa otomat
-        '''
-        # Đầy đủ hóa otomat
-        self.fill()
+    # def DFA(self):
+    #     '''
+    #         Đầy đủ và đơn định hóa otomat
+    #     '''
+    #     # Đầy đủ hóa otomat
+    #     self.fill()
 
-        # Khử epsilon
-        self.remove_epsilon()
+    #     # Khử epsilon
+    #     self.remove_epsilon()
         
-        # Đơn định hóa
-        queue = [self.S0]
-        visited = []
-        while len(queue) > 0:
-            current_state = queue.pop(0)
-            # Nếu đã thăm trạng thái hiện tại thì không làm gì cả
-            if current_state in visited:
-                continue 
-            visited.append(current_state)
+    #     # Đơn định hóa
+    #     queue = [self.S0]
+    #     visited = []
+    #     while len(queue) > 0:
+    #         current_state = queue.pop(0)
+    #         # Nếu đã thăm trạng thái hiện tại thì không làm gì cả
+    #         if current_state in visited:
+    #             continue 
+    #         visited.append(current_state)
 
-            for symbol in self.sigma:
-                targets = self.delta[current_state][symbol]
-                for i in range(len(targets)):
-                    if '_' in targets[i]:
-                        current = targets.pop(i)
-                        targets += current.split('_')
-                targets = list(set(targets))
-                # Trường hợp hàm chuyển trạng thái delta(current_state, symbol) không đơn định
-                if len(targets) > 1:
-                    # ['S1', 'S2'] -> 'S1_S2'
-                    new_state = '_'.join(sorted(targets))
-                    # Nếu đã thăm trạng thái này rồi thì không thăm lại
-                    if new_state in visited:
-                        # Thay kết quả của hàm chuyển trạng thái cũ thành trạng thái mới
-                        self.delta[current_state][symbol] = [new_state]
-                        continue
+    #         for symbol in self.sigma:
+    #             targets = self.delta[current_state][symbol]
+    #             for i in range(len(targets)):
+    #                 if '_' in targets[i]:
+    #                     current = targets.pop(i)
+    #                     targets += current.split('_')
+    #             targets = list(set(targets))
+    #             # Trường hợp hàm chuyển trạng thái delta(current_state, symbol) không đơn định
+    #             if len(targets) > 1:
+    #                 # ['S1', 'S2'] -> 'S1_S2'
+    #                 new_state = '_'.join(sorted(targets))
+    #                 # Nếu đã thăm trạng thái này rồi thì không thăm lại
+    #                 if new_state in visited:
+    #                     # Thay kết quả của hàm chuyển trạng thái cũ thành trạng thái mới
+    #                     self.delta[current_state][symbol] = [new_state]
+    #                     continue
                     
-                    # Khởi tạo hàm chuyển trạng thái cho trạng thái mới
-                    self.delta[new_state] = {}
+    #                 # Khởi tạo hàm chuyển trạng thái cho trạng thái mới
+    #                 self.delta[new_state] = {}
 
-                    # Xây dựng hàm chuyển trạng thái cho trạng thái mới
-                    for character in self.sigma:
-                        new_targets_for_new_state = []
-                        for state in targets:
-                            for target in self.delta[state][character]:
-                                if target not in new_targets_for_new_state:
-                                    new_targets_for_new_state.append(target)
-                        new_targets_for_new_state = list(set(new_targets_for_new_state))
-                        self.delta[new_state][character] = new_targets_for_new_state
+    #                 # Xây dựng hàm chuyển trạng thái cho trạng thái mới
+    #                 for character in self.sigma:
+    #                     new_targets_for_new_state = []
+    #                     for state in targets:
+    #                         for target in self.delta[state][character]:
+    #                             if target not in new_targets_for_new_state:
+    #                                 new_targets_for_new_state.append(target)
+    #                     new_targets_for_new_state = list(set(new_targets_for_new_state))
+    #                     self.delta[new_state][character] = new_targets_for_new_state
                     
-                    # Thay kết quả của hàm chuyển trạng thái cũ thành trạng thái mới
-                    self.delta[current_state][symbol] = [new_state]
+    #                 # Thay kết quả của hàm chuyển trạng thái cũ thành trạng thái mới
+    #                 self.delta[current_state][symbol] = [new_state]
 
-                    # Thêm trạng thái mới vào danh sách chờ
-                    queue.append(new_state)
+    #                 # Thêm trạng thái mới vào danh sách chờ
+    #                 queue.append(new_state)
 
-                # Nếu hàm chuyển trạng thái delta(current_state, symbol) đơn định thì thêm vào queue và không làm gì cả
-                elif len(targets) == 1:
-                    queue.append(targets[0])
+    #             # Nếu hàm chuyển trạng thái delta(current_state, symbol) đơn định thì thêm vào queue và không làm gì cả
+    #             elif len(targets) == 1:
+    #                 queue.append(targets[0])
 
-        # Xóa các trạng thái thừa
-        for state in self.S:
-            if state not in visited:
-                del self.delta[state]
+    #     # Xóa các trạng thái thừa
+    #     for state in self.S:
+    #         if state not in visited:
+    #             del self.delta[state]
 
-        self.S = sorted(visited)
+    #     self.S = sorted(visited)
 
-        # Thêm các trạng thái kết thúc mới
-        for state in self.S:
-            for f in self.F:
-                if f in state:
-                    if state not in self.F:
-                        self.F.append(state)
+    #     # Thêm các trạng thái kết thúc mới
+    #     for state in self.S:
+    #         for f in self.F:
+    #             if f in state:
+    #                 if state not in self.F:
+    #                     self.F.append(state)
 
-        # Xóa các trạng thái kết thúc không tồn tại trong tập trạng thái mới
-        for f in self.F:
-            if f not in self.S:
-                self.F.remove(f)
+    #     # Xóa các trạng thái kết thúc không tồn tại trong tập trạng thái mới
+    #     for f in self.F:
+    #         if f not in self.S:
+    #             self.F.remove(f)
 
     '''
         Tối thiểu hóa otomat
@@ -209,11 +209,8 @@ class Otomat:
         return unmarked_states_group
 
     def minimize(self):
-        '''
-            Tối thiểu hóa otomat sử dụng phương pháp điền bảng
-            https://www.youtube.com/watch?v=UiXkJUTkp44
-        '''
-        self.DFA()
+
+        self.fill()
         table = self.fill_table()
         unmarked_states_group = self.combine_unmarked_pairs(table)
 
